@@ -52,7 +52,6 @@ def astar(graph, start, end):
         f[node] = float("inf")
 
     f[start] = Graph.calculate_distance(start, end)
-
     while len(discovered) != 0:
         lowest = None
         for node in discovered:

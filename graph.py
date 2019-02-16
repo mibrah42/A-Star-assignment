@@ -1,6 +1,7 @@
 import geopy.distance
 from way import Way 
 from node import Node
+from math import sqrt
 
 class Graph:
     def __init__(self):
@@ -32,11 +33,13 @@ class Graph:
             if way not in self.adjacencyList[node]:
                 self.adjacencyList[node].append(way)
     
-    def calculate_distance(self, start_node, end_node):
+    @staticmethod
+    def calculate_distance(start_node, end_node):
         coords_1 = (start_node.lat, start_node.lon)
         coords_2 = (end_node.lat, end_node.lon)
-        return geopy.distance.vincenty(coords_1, coords_2).km
-
+        height_diff = abs(start_node.elevation - end_node.elevation)
+        straight_distance = geopy.distance.vincenty(coords_1, coords_2).km
+        return sqrt((height_diff)**2+(straight_distance)**2)
 
 if __name__ == "__main__":
     g = Graph()

@@ -126,9 +126,8 @@ def read_xml(filename):
                     print("Name is " + subitem.get('v'))
                     break
 
-
 def main():
-    read_xml("dbv.osm")
+    read_xml("map.osm")
 
     master = Tk()
     line = (60, 10, 70, 20)

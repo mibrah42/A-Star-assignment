@@ -9,7 +9,7 @@ class Node:
         self.h = 0
     
     def __repr__(self):
-        return f"Node({self.id})"
+        return f"Node({self.id} lat: {self.lat}, lon: {self.lon}, elevation: {self.elevation})"
     
     def __str__(self):
         return str(self.__dict__)

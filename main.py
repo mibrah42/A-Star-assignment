@@ -5,14 +5,20 @@ from way import Way
 from node import Node
 from graph import Graph
 from random import randint
+from elevation_data import elevations
+from gmplot import gmplot
+
+gmap = gmplot.GoogleMapPlotter(43.945704, -78.896180, 13)
 
 def create_graph(filename, g):
     tree = ET.parse(filename)
     root = tree.getroot()
     for item in root:
         if item.tag == 'node':
-            node = Node(item.get('id'), float(item.get("lat")), float(item.get("lon")), randint(5000, 10000))
+            node = Node(item.get('id'), float(item.get("lat")), float(item.get("lon")), elevations[item.get('id')])
             g.add_node(node)
+         
+    for item in root:
         if item.tag == 'way':
             id = item.get("id")
             nodes = []
@@ -26,13 +32,73 @@ def create_graph(filename, g):
             way = Way(id, name, nodes)
             g.add_way(way)
 
-def aStarSearch(start_node, end_node):
-    pass
-            
+def getTrace(trace, curr):
+    path = []
+    path.append(curr)
+    while curr in trace.keys():
+        curr = trace[curr]
+        path.append(curr)
+    return path
+
+def astar(graph, start, end):
+    visited = set()
+    discovered = set()
+    discovered.add(start)
+    trace = {}
+    g = {}
+    for node in graph.nodes():
+        g[node] = float("inf")
+    g[start] = 0
+
+    f = {}
+    for node in graph.nodes():
+        f[node] = float("inf")
+
+    f[start] = Graph.calculate_distance(start, end)
+
+    while len(discovered) != 0:
+        lowest = None
+        for node in discovered:
+            if lowest is None:
+                lowest = node
+            else:
+                if f[node] < f[lowest]:
+                    lowest = node
+        curr = lowest
+        if curr == end:
+            return getTrace(trace, curr)
+
+        discovered.remove(curr)
+        visited.add(curr)
+        for way in graph.adjacencyList[curr]:
+            for adjacentNode in way.connected_nodes:
+                if adjacentNode not in visited:
+                    tmp_g = g[curr] + Graph.calculate_distance(curr, adjacentNode)
+                    if adjacentNode not in discovered:
+                        discovered.add(adjacentNode)
+                    elif tmp_g >= g[adjacentNode]:
+                        continue
+                    trace[adjacentNode] = curr
+                    g[adjacentNode] = tmp_g
+                    f[adjacentNode] = g[adjacentNode] + Graph.calculate_distance(adjacentNode, end)
+
 def main():
     g = Graph()
     create_graph("map.osm", g)
-    print(g)
+    trace = astar(g, g.nodes()[50], g.nodes()[230])
+    coordinates = []
+    for node in trace:
+        coordinates.append((node.lat, node.lon))
+    print(coordinates)
+    
+    top_attraction_lats, top_attraction_lons = zip(*coordinates)
+    gmap.scatter(top_attraction_lats, top_attraction_lons,'#3B0B39', size=40, marker=False)
+    golden_gate_park_lats, golden_gate_park_lons = zip(*coordinates)
+    gmap.plot(golden_gate_park_lats, golden_gate_park_lons,'cornflowerblue', edge_width=10)
+    gmap.draw("my_map.html")
+    print(trace)
 
 if __name__ == '__main__':
     main()
+
+

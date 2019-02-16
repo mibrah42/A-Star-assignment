@@ -6,9 +6,6 @@ from node import Node
 from graph import Graph
 from random import randint
 from elevation_data import elevations
-from gmplot import gmplot
-
-gmap = gmplot.GoogleMapPlotter(43.945704, -78.896180, 13)
 
 def create_graph(filename, g):
     tree = ET.parse(filename)
@@ -90,12 +87,6 @@ def main():
     for node in trace:
         coordinates.append((node.lat, node.lon))
     print(coordinates)
-    
-    top_attraction_lats, top_attraction_lons = zip(*coordinates)
-    gmap.scatter(top_attraction_lats, top_attraction_lons,'#3B0B39', size=40, marker=False)
-    golden_gate_park_lats, golden_gate_park_lons = zip(*coordinates)
-    gmap.plot(golden_gate_park_lats, golden_gate_park_lons,'cornflowerblue', edge_width=10)
-    gmap.draw("my_map.html")
     print(trace)
 
 if __name__ == '__main__':
